@@ -68,9 +68,10 @@ interface RepositoryInterface
      *
      * @param string $type the type of query to perform
      * @param array<string, mixed> $options An array that will be passed to Query::applyOptions()
+     * @param mixed ...$args Arguments that match up to finder-specific parameters
      * @return \Cake\Datasource\QueryInterface
      */
-    public function find(string $type = 'all', array $options = []): QueryInterface;
+    public function find(string $type = 'all', array $options = [], mixed ...$args): QueryInterface;
 
     /**
      * Returns a single record after finding it by its primary key, if no record is

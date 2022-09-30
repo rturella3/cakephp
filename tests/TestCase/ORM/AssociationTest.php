@@ -488,6 +488,15 @@ class AssociationTest extends TestCase
         );
     }
 
+    public function testCustomFinderWithTypedArgs(): void
+    {
+        $this->association->setFinder('published');
+        $this->assertEquals(
+            ['this' => 'custom'],
+            $this->association->find(null, [], 'custom')->getOptions()
+        );
+    }
+
     /**
      * Tests that `locator` is a valid option for the association constructor
      */

@@ -264,12 +264,15 @@ class BehaviorRegistry extends ObjectRegistry implements EventDispatcherInterfac
     /**
      * Invoke a finder on a behavior.
      *
+     * @internal
      * @param string $type The finder type to invoke.
-     * @param array $args The arguments you want to invoke the method with.
+     * @param \Cake\ORM\Query\SelectQuery $query The query object to apply the finder options to.
+     * @param array<string, mixed> $options List of options to pass to the finder.
+     * @param mixed ...$args Arguments that match up to finder-specific parameters
      * @return \Cake\ORM\Query\SelectQuery The return value depends on the underlying behavior method.
      * @throws \BadMethodCallException When the method is unknown.
      */
-    public function callFinder(string $type, array $args = []): SelectQuery
+    public function callFinder(string $type, SelectQuery $query, array $options = [], mixed ...$args): SelectQuery
     {
         $type = strtolower($type);
 
@@ -277,7 +280,7 @@ class BehaviorRegistry extends ObjectRegistry implements EventDispatcherInterfac
             [$behavior, $callMethod] = $this->_finderMap[$type];
             $callable = [$this->_loaded[$behavior], $callMethod];
 
-            return $callable(...$args);
+            return $callable($query, $options, ...$args);
         }
 
         throw new BadMethodCallException(

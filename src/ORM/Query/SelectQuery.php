@@ -1666,15 +1666,16 @@ class SelectQuery extends DbSelectQuery implements JsonSerializable, QueryInterf
      *
      * @param string $finder The finder method to use.
      * @param array<string, mixed> $options The options for the finder.
+     * @param mixed ...$args Arguments that match up to finder-specific parameters
      * @return static Returns a modified query.
      * @psalm-suppress MoreSpecificReturnType
      */
-    public function find(string $finder, array $options = []): static
+    public function find(string $finder, array $options = [], mixed ...$args): static
     {
         $table = $this->getRepository();
 
         /** @psalm-suppress LessSpecificReturnStatement */
-        return $table->callFinder($finder, $this, $options);
+        return $table->callFinder($finder, $this, $options, ...$args);
     }
 
     /**

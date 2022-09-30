@@ -1219,21 +1219,29 @@ class Table implements RepositoryInterface, EventListenerInterface, EventDispatc
      * ### Calling finders
      *
      * The find() method is the entry point for custom finder methods.
-     * You can invoke a finder by specifying the type:
+     * You can invoke a finder by specifying the type.
+     *
+     * This will invoke the `findPublished` method:
      *
      * ```
      * $query = $articles->find('published');
      * ```
      *
-     * Would invoke the `findPublished` method.
+     * Any arguments passed after the `$options` array will be passed to the finder method.
+     * The `$options` array is not optional when using typed arguments instead an options array:
+     *
+     * ```
+     * $query = $articles->find('published', [], $category);
+     * ```
      *
      * @param string $type the type of query to perform
      * @param array<string, mixed> $options An array that will be passed to Query::applyOptions()
+     * @param mixed ...$args Arguments that match up to finder-specific parameters
      * @return \Cake\ORM\Query\SelectQuery The query builder
      */
-    public function find(string $type = 'all', array $options = []): SelectQuery
+    public function find(string $type = 'all', array $options = [], mixed ...$args): SelectQuery
     {
-        return $this->callFinder($type, $this->selectQuery(), $options);
+        return $this->callFinder($type, $this->query()->select(), $options, ...$args);
     }
 
     /**
@@ -2557,16 +2565,18 @@ class Table implements RepositoryInterface, EventListenerInterface, EventDispatc
     /**
      * Calls a finder method and applies it to the passed query.
      *
+     * @internal
      * @param string $type Name of the finder to be called.
      * @param \Cake\ORM\Query\SelectQuery $query The query object to apply the finder options to.
      * @param array<string, mixed> $options List of options to pass to the finder.
+     * @param mixed ...$args Arguments that match up to finder-specific parameters
      * @return \Cake\ORM\Query\SelectQuery
      * @throws \BadMethodCallException
      * @uses findAll()
      * @uses findList()
      * @uses findThreaded()
      */
-    public function callFinder(string $type, SelectQuery $query, array $options = []): SelectQuery
+    public function callFinder(string $type, SelectQuery $query, array $options = [], mixed ...$args): SelectQuery
     {
         assert(empty($options) || !array_is_list($options), 'Finder options should be an associative array not a list');
 
@@ -2574,11 +2584,11 @@ class Table implements RepositoryInterface, EventListenerInterface, EventDispatc
         $options = $query->getOptions();
         $finder = 'find' . $type;
         if (method_exists($this, $finder)) {
-            return $this->{$finder}($query, $options);
+            return $this->{$finder}($query, $options, ...$args);
         }
 
         if ($this->_behaviors->hasFinder($type)) {
-            return $this->_behaviors->callFinder($type, [$query, $options]);
+            return $this->_behaviors->callFinder($type, $query, $options, ...$args);
         }
 
         throw new BadMethodCallException(sprintf(

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace TestApp\Model\Table;
 
-use Cake\ORM\Query;
+use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\Table;
 
 /**
@@ -27,8 +27,9 @@ class GreedyCommentsTable extends Table
      *
      * @param string $type Find type
      * @param array<string, mixed> $options find options
+     * @param mixed ...$args Arguments that match up to finder-specific parameters
      */
-    public function find(string $type = 'all', array $options = []): Query
+    public function find(string $type = 'all', array $options = [], mixed ...$args): SelectQuery
     {
         if (empty($options['conditions'])) {
             $options['conditions'] = [];
