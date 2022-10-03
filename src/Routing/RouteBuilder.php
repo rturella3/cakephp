@@ -748,7 +748,7 @@ class RouteBuilder
                 }
             }
             $defaults += $this->_params + ['plugin' => null];
-            if (!isset($defaults['action']) && !isset($options['action'])) {
+            if (!isset($defaults['action']) && !isset($options['action']) && empty($options['_allow_no_action'])) {
                 $defaults['action'] = 'index';
             }
 
@@ -798,6 +798,11 @@ class RouteBuilder
         $options['routeClass'] = $options['routeClass'] ?? RedirectRoute::class;
         if (is_string($url)) {
             $url = ['redirect' => $url];
+        }
+
+        // if a name for the route is passed, the 'action' will not be necessary
+        if (isset($url['_name'])) {
+            $options['_allow_no_action'] = true;
         }
 
         return $this->connect($route, $url, $options);

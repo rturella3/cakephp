@@ -19,6 +19,8 @@ namespace Cake\Test\TestCase\Routing;
 use BadMethodCallException;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Core\Plugin;
+use Cake\Http\Exception\RedirectException;
+use Cake\Http\ServerRequest;
 use Cake\Routing\Route\InflectedRoute;
 use Cake\Routing\Route\RedirectRoute;
 use Cake\Routing\Route\Route;
@@ -394,6 +396,23 @@ class RouteBuilderTest extends TestCase
         $route = $routes->redirect('/old', '/forums');
         $this->assertInstanceOf(RedirectRoute::class, $route);
         $this->assertSame($route, $this->collection->routes()[2]);
+    }
+
+    public function testRedirectToNamedRoute(): void
+    {
+        $this->expectException(RedirectException::class);
+        $this->expectExceptionMessage('http://localhost/test');
+
+        Router::reload();
+        $routes = Router::createRouteBuilder('/');
+
+        $route_1 = $routes->connect('/test', ['controller' => 'Pages', 'action' => 'test'], ['_name' => 'test']);
+        $route_2 = $routes->redirect('/test-redirect', ['_name' => 'test']);
+
+        $request = new ServerRequest(['url' => '/test-redirect']);
+        $result = Router::getRouteCollection()->parseRequest($request);
+
+        $this->assertSame($route_1, $result);
     }
 
     /**
