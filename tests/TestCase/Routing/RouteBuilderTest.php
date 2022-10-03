@@ -415,6 +415,23 @@ class RouteBuilderTest extends TestCase
         $this->assertSame($route_1, $result);
     }
 
+    public function testRedirectToNamedRouteWithPersist(): void
+    {
+        $this->expectException(RedirectException::class);
+        $this->expectExceptionMessage('http://localhost/test/1');
+
+        Router::reload();
+        $routes = Router::createRouteBuilder('/');
+
+        $route_1 = $routes->connect('/test/{id}', ['controller' => 'Pages', 'action' => 'test'], ['_name' => 'test']);
+        $route_2 = $routes->redirect('/test-redirect/{id}', ['_name' => 'test'], ['persist' => ['id']]);
+
+        $request = new ServerRequest(['url' => '/test-redirect/1']);
+        $result = Router::getRouteCollection()->parseRequest($request);
+
+        $this->assertSame($route_1, $result);
+    }
+
     /**
      * Test using a custom route class for redirect routes.
      */

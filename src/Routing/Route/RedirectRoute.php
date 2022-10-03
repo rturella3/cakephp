@@ -81,7 +81,16 @@ class RedirectRoute extends Route
                     }
                 }
             }
+
+            // save the route name because 'Router::reverseToArray' don't keep it
+            // the name is needed for 'Router::url' create the URL
+            $route_name = $redirect['_name'] ?? null;
+
             $redirect = Router::reverseToArray($redirect);
+
+            if ($route_name) {
+                $redirect['_name'] = $route_name;
+            }
         }
         $status = 301;
         if (isset($this->options['status']) && ($this->options['status'] >= 300 && $this->options['status'] < 400)) {
