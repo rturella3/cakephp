@@ -432,6 +432,40 @@ class RouteBuilderTest extends TestCase
         $this->assertSame($route_1, $result);
     }
 
+    public function testRedirectToNamedRouteWithMultiplePersists(): void
+    {
+        $this->expectException(RedirectException::class);
+        $this->expectExceptionMessage('http://localhost/test/1/lorem-ipsum');
+
+        Router::reload();
+        $routes = Router::createRouteBuilder('/');
+
+        $route_1 = $routes->connect('/test/{id}/{code}', ['controller' => 'Pages', 'action' => 'test'], ['_name' => 'test']);
+        $route_2 = $routes->redirect('/test-redirect/{code}/{id}', ['_name' => 'test'], ['persist' => ['id', 'code']]);
+
+        $request = new ServerRequest(['url' => '/test-redirect/lorem-ipsum/1']);
+        $result = Router::getRouteCollection()->parseRequest($request);
+
+        $this->assertSame($route_1, $result);
+    }
+
+    public function testRedirectToNamedRouteWithAsteriskAndPersist(): void
+    {
+        $this->expectException(RedirectException::class);
+        $this->expectExceptionMessage('http://localhost/test/lorem/ipsum/dolor/sit/amet');
+
+        Router::reload();
+        $routes = Router::createRouteBuilder('/');
+
+        $route_1 = $routes->connect('/test/*', ['controller' => 'Pages', 'action' => 'test'], ['_name' => 'test']);
+        $route_2 = $routes->redirect('/test-redirect/*', ['_name' => 'test'], ['persist' => true]);
+
+        $request = new ServerRequest(['url' => '/test-redirect/lorem/ipsum/dolor/sit/amet']);
+        $result = Router::getRouteCollection()->parseRequest($request);
+
+        $this->assertSame($route_1, $result);
+    }
+
     /**
      * Test using a custom route class for redirect routes.
      */
